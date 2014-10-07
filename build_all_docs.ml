@@ -262,15 +262,14 @@ let projects = [
 
 let () =
   match Array.to_list Sys.argv with
-  | exec :: "go" :: [] ->
+  | exec :: "go" :: url :: auth_token :: [] ->
     let override_configuration =
       let open Ketrew_configuration in
-      client "https://localhost:8443"
-        ~token:"netok"
+      client url ~token:auth_token
       |> create ~debug_level:2 in
     Ketrew.EDSL.(
       run (build_website ~host:(Host.parse "/tmp/KT") projects)
         ~override_configuration
     )
-  | other -> printf "usage: %s go\n%!" Sys.argv.(0)
+  | other -> printf "usage: %s go <URL> <TOKEN>\n%!" Sys.argv.(0)
 
