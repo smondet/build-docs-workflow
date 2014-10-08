@@ -36,14 +36,14 @@ let project
     method interesting_checkouts = interesting_checkouts
   end
 
-let build_website ~host projects =
+let build_website ~host ~work_dir projects =
   let open Ketrew.EDSL in
   let make prog =
     daemonize ~using:`Python_daemon ~host prog
   in
   let make_shell cmd = make Program.(sh cmd) in
   let tmp_dir m = 
-    let name = "/tmp/websites/" // m in
+    let name = work_dir // m in
     target name  ~product:(file ~host name)
       (* ~done_when:(Condition.(program ~returns:0  ~host *)
       (*                          Program.( *)
@@ -262,13 +262,14 @@ let projects = [
 
 let () =
   match Array.to_list Sys.argv with
-  | exec :: "go" :: url :: auth_token :: [] ->
+  | exec :: "go" :: url :: auth_token :: work_dir ::  [] ->
     let override_configuration =
       let open Ketrew_configuration in
       client url ~token:auth_token
       |> create ~debug_level:2 in
     Ketrew.EDSL.(
-      run (build_website ~host:(Host.parse "/tmp/KT") projects)
+      run (build_website
+             ~work_dir ~host:(Host.parse "/tmp/KT") projects)
         ~override_configuration
     )
   | other -> printf "usage: %s go <URL> <TOKEN>\n%!" Sys.argv.(0)
