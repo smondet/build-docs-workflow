@@ -193,10 +193,17 @@ let call_ocaml_doc ~packages ~title sources = [
   ]
 ]
 
+let add_prefix_catches l ~prefix = List.map l (fun m -> (m, prefix))
+
 let projects = [
   project "nonstd"
     ~description:"Nano-library providing very few Core-like modules (like `List`, `Option`)"
-    ~build_documentation:(fun _ -> please_dot_ml_doc_building "nonstd")
+    ~build_documentation:(fun _ ->
+        let catch_more =
+          add_prefix_catches ~prefix:"Nonstd."
+            ["List"; "Option"; "Float"; "Int"; "Array"]
+        in
+        please_dot_ml_doc_building "nonstd" ~catch_more)
     ~repository:(`Bitbucket "smondet/nonstd");
   project "sosa"
     ~description:"The “Sane OCaml String API” library is a set of APIs (module types) \
