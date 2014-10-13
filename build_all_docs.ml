@@ -142,6 +142,9 @@ let build_website ~host ~work_dir projects =
 let module_name_rex =
   "(^[A-Z]+[A-Za-z0-9]*_[A-Za-z0-9]*)|(^[A-Z]+$)"
 
+let module_type_name_rex =
+  "(^[A-Z]+[A-Z0-9]*_[A-Z0-9]*)|(^[A-Z]+$)"
+
 (*
 let test_module_name =
   Re_posix.compile_pat module_name_rex
@@ -163,7 +166,7 @@ let please_dot_ml_doc_building ?(catch_more=[]) ?(more_files=[]) name =
     `Do ["ocaml"; "please.ml"; "build_doc"];
     `Do ["sh"; "-c"; sprintf 
            "API=_build/doc/ INPUT=%s.ml%s INDEX=README.md \
-            CATCH_MODULE_PATHS='%s^%s:,%s:%s.' \
+            CATCH_MODULE_PATHS='%s^%s:,' \
             TITLE_SUBSTITUTIONS='%s%s.ml:Literate Implementation' \
             TITLE_PREFIX='%s: ' oredoc"
            name
@@ -171,7 +174,7 @@ let please_dot_ml_doc_building ?(catch_more=[]) ?(more_files=[]) name =
             |> String.concat ~sep:"")
            (List.map catch_more ~f:(fun (a, b) -> sprintf "%s:%s," a b)
             |> String.concat ~sep:"")
-           modname module_name_rex modname
+           modname
            (List.map more_files ~f:(fun (a, b) ->
                 sprintf "%s:%s," (Filename.basename a) b)
             |> String.concat ~sep:"")
@@ -211,8 +214,9 @@ let projects = [
                   and a set of modules and functors that implement them"
     ~build_documentation:(fun _ ->
         please_dot_ml_doc_building "sosa"
-          ~catch_more:["Make_output","Sosa.BASIC_STRING."]
-          ~more_files:["test/sosa_test.ml", "Tests (`sosa_test.ml`)"]
+          ~catch_more:[module_type_name_rex,"Sosa.";
+                       "Make_output", "Sosa.BASIC_STRING."]
+          ~more_files:["test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)"]
       )
     ~repository:(`Bitbucket "smondet/sosa");
   project "docout"
