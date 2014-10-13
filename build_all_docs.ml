@@ -115,7 +115,11 @@ let build_website ~host ~work_dir projects =
         "\n\n## Contact\n\n\
          Please use if possible the issue trackers of the corresponding \
          repositories. \
-         You may also contact [Seb Mondet](http://seb.mondet.org)."
+         You may also contact [Seb Mondet](http://seb.mondet.org).\
+         \n\
+         This website was proudly brought to you by a \
+         [Ketrew workflow](https://github.com/smondet/build-docs-workflow).
+         "
       ]
       |> String.concat ~sep:""
     in
@@ -138,6 +142,7 @@ let build_website ~host ~work_dir projects =
 let module_name_rex =
   "(^[A-Z]+[A-Za-z0-9]*_[A-Za-z0-9]*)|(^[A-Z]+$)"
 
+(*
 let test_module_name =
   Re_posix.compile_pat module_name_rex
   |> (fun re ->
@@ -148,6 +153,7 @@ let test_module_name =
       t "KLDJFSD";
       t "kl_djfsd";
     )
+*)
 
 let please_dot_ml_doc_building ?(catch_more=[]) ?(more_files=[]) name =
   let modname = Oldschool_string.capitalize name in
@@ -272,5 +278,5 @@ let () =
              ~work_dir ~host:(Host.parse "/tmp/KT") projects)
         ~override_configuration
     )
-  | other -> printf "usage: %s go <URL> <TOKEN>\n%!" Sys.argv.(0)
+  | other -> printf "usage: %s go <URL> <TOKEN> <TMPDIR>\n%!" Sys.argv.(0)
 
