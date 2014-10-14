@@ -75,6 +75,10 @@ let build_website ~host ~work_dir projects =
                   exec ["cd"; tmp#product#path]
                   && exec ["git"; "clone"; p#clone_url]
                   && exec ["cd"; p#basename]
+                  && shf "export ADD_TO_MENU='\
+                          - Repository [at %s](%s)\n\
+                          - Up: [Software Projects](../index.html)'"
+                    p#repository_kind p#repository_web_url
                   && do_stuff "master"
                   && chain (List.map p#interesting_checkouts (fun co ->
                       exec ["git"; "checkout"; co]
@@ -143,7 +147,7 @@ let module_name_rex =
   "(^[A-Z]+[A-Za-z0-9]*_[A-Za-z0-9]*)|(^[A-Z]+$)"
 
 let module_type_name_rex =
-  "(^[A-Z]+[A-Z0-9]*_[A-Z0-9]*)|(^[A-Z]+$)"
+  "^[A-Z]+[A-Z0-9_]*$"
 
 (*
 let test_module_name =
@@ -223,14 +227,21 @@ let projects = [
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
                   DSL on top of the \
                   [smart-print](https://github.com/clarus/smart-print) library"
-    ~build_documentation:(fun _ -> please_dot_ml_doc_building "docout")
+    ~build_documentation:(fun _ ->
+        please_dot_ml_doc_building
+          ~catch_more:[module_type_name_rex,"Docout.";]
+          "docout")
     ~repository:(`Bitbucket "smondet/docout");
   project "pvem"
     ~description:"The \"Polymorphic Variants-based Error Monad\", \
                   `Pvem` (pronounce /pi:vɛm/), is a module providing \
                   simple handling of an error monad type based on \
                   polymorphic variants"
-    ~build_documentation:(fun _ ->  please_dot_ml_doc_building "pvem")
+    ~build_documentation:(fun _ ->
+        let catch_more = [module_type_name_rex, "Pvem.";
+                          "ERROR_MONAD.[a-z]+", "Pvem." ] in
+        let more_files = ["doc/implementation.md", "Implementation Notes"] in
+        please_dot_ml_doc_building ~catch_more ~more_files "pvem")
     ~repository:(`Bitbucket "smondet/pvem");
   project "atd2cconv" 
     ~description:"The `atd2cconv` application compiles \
@@ -254,7 +265,9 @@ let projects = [
   project  "pvem_lwt_unix"
       ~description:"`Pvem_lwt_unix` provides a high-level API on top of \
                     `Lwt_unix`, with comprehensive error types"
-    ~build_documentation:(fun _ ->  please_dot_ml_doc_building "pvem_lwt_unix")
+      ~build_documentation:(fun _ ->
+        let catch_more = [module_type_name_rex, "Pvem_lwt_unix."; ] in
+        please_dot_ml_doc_building ~catch_more "pvem_lwt_unix")
     ~repository:(`Bitbucket "smondet/pvem_lwt_unix");
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
