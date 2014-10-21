@@ -55,6 +55,15 @@ let build_website ~host ~work_dir projects =
   in
   let tmp = tmp_dir "clones" in
   let results = tmp_dir "results" in
+  let export_add_to_menu p from =
+    let prefix =
+      match from with
+      | `Main_level -> "../"
+      | `Interesting_checkout -> "../../" in
+    Program.shf "export ADD_TO_MENU='\
+                 - Repository [at %s](%s)\n\
+                 - Up: [Software Projects](%sindex.html)'"
+      p#repository_kind p#repository_web_url prefix in
   let documentations =
     List.filter_map projects ~f:(fun p ->
         Option.map p#build_documentation (fun stuff_todo ->
@@ -75,13 +84,11 @@ let build_website ~host ~work_dir projects =
                   exec ["cd"; tmp#product#path]
                   && exec ["git"; "clone"; p#clone_url]
                   && exec ["cd"; p#basename]
-                  && shf "export ADD_TO_MENU='\
-                          - Repository [at %s](%s)\n\
-                          - Up: [Software Projects](../index.html)'"
-                    p#repository_kind p#repository_web_url
+                  && export_add_to_menu p `Main_level
                   && do_stuff "master"
                   && chain (List.map p#interesting_checkouts (fun co ->
                       exec ["git"; "checkout"; co]
+                      && export_add_to_menu p `Interesting_checkout
                       &&  do_stuff co
                     ))
                 ))
@@ -100,8 +107,10 @@ let build_website ~host ~work_dir projects =
               (match p#interesting_checkouts with
                | [] -> ""
                | more -> 
-                 sprintf ", and also the documentation for version%s %s"
-                   (if List.length more = 1 then "" else "s: ")
+                 sprintf ", and also the documentation for specific \
+                          version%s/branche%s %s"
+                   (if List.length more = 1 then "" else "s")
+                   (if List.length more = 1 then ": " else "s: ")
                    (List.map more ~f:(fun m ->
                         sprintf "[`%s`](%s/%s/index.html)" m 
                           p#basename m)
