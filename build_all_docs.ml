@@ -73,7 +73,7 @@ let build_website ~host ~work_dir projects =
          :: List.filter_map p#interesting_checkouts
            ~f:(function
              | b when b = ic -> None
-             | b -> Some (sprintf "- Branch/Tag: [`%s`](./%s/index.html)\n" b b)))
+             | b -> Some (sprintf "- Branch/Tag: [`%s`](../%s/index.html)\n" b b)))
     in
     Program.shf "export ADD_TO_MENU='\
                  %s\
