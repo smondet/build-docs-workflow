@@ -222,7 +222,7 @@ let projects = [
                        "Make_output", "Sosa.BASIC_STRING."]
           ~more_files:["test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)"]
       )
-    ~repository:(`Bitbucket "smondet/sosa");
+    ~repository:(`Github "smondet/sosa");
   project "docout"
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
                   DSL on top of the \
