@@ -36,6 +36,11 @@ let project
     method interesting_checkouts = interesting_checkouts
   end
 
+let css = [ 
+  "http://maxcdn.bootstrapcdn.com/bootswatch/3.2.0/readable/bootstrap.min.css";
+  "https://cdn.rawgit.com/hammerlab/ketrew/2d1c430cca52caa71e363a765ff8775a6ae14ba9/src/doc/code_style.css";
+]
+
 let build_website ~host ~work_dir projects =
   let open Ketrew.EDSL in
   let make prog =
@@ -64,6 +69,10 @@ let build_website ~host ~work_dir projects =
                  - Repository [at %s](%s)\n\
                  - Up: [Software Projects](%sindex.html)'"
       p#repository_kind p#repository_web_url prefix in
+  let export_css =
+    Program.shf "export CSS=%s"
+      (String.concat ~sep:"," css |> Filename.quote)
+  in
   let documentations =
     List.filter_map projects ~f:(fun p ->
         Option.map p#build_documentation (fun stuff_todo ->
@@ -84,6 +93,7 @@ let build_website ~host ~work_dir projects =
                   exec ["cd"; tmp#product#path]
                   && exec ["git"; "clone"; p#clone_url]
                   && exec ["cd"; p#basename]
+                  && export_css
                   && export_add_to_menu p `Main_level
                   && do_stuff "master"
                   && chain (List.map p#interesting_checkouts (fun co ->
@@ -141,6 +151,7 @@ let build_website ~host ~work_dir projects =
       ~dependencies:[results]
       ~make:(make Program.(
           shf "echo %s > %s" Filename.(quote content)  index_md
+          && export_css
           && shf "INDEX=%s OUTPUT_DIR=%s INPUT= oredoc" index_md
             results#product#path
         ))
