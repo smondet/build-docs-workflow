@@ -61,13 +61,25 @@ let build_website ~host ~work_dir projects =
   let tmp = tmp_dir "clones" in
   let results = tmp_dir "results" in
   let export_add_to_menu p from =
-    let prefix =
+    let prefix, more_branches =
       match from with
-      | `Main_level -> "../"
-      | `Interesting_checkout -> "../../" in
+      | `Main_level ->
+        "../",  
+        (List.map p#interesting_checkouts
+          ~f:(fun b -> sprintf "- Branch/Tag: [`%s`](./%s/index.html)\n" b b))
+      | `Interesting_checkout ic ->
+        "../../", 
+        ("- [`master`](../index.html) branch\n"
+         :: List.filter_map p#interesting_checkouts
+           ~f:(function
+             | b when b = ic -> None
+             | b -> Some (sprintf "- Branch/Tag: [`%s`](./%s/index.html)\n" b b)))
+    in
     Program.shf "export ADD_TO_MENU='\
+                 %s\
                  - Repository [at %s](%s)\n\
                  - Up: [Software Projects](%sindex.html)'"
+      (String.concat ~sep:"" more_branches)
       p#repository_kind p#repository_web_url prefix in
   let export_css =
     Program.shf "export CSS=%s"
@@ -98,7 +110,7 @@ let build_website ~host ~work_dir projects =
                   && do_stuff "master"
                   && chain (List.map p#interesting_checkouts (fun co ->
                       exec ["git"; "checkout"; co]
-                      && export_add_to_menu p `Interesting_checkout
+                      && export_add_to_menu p (`Interesting_checkout co)
                       &&  do_stuff co
                     ))
                 ))
