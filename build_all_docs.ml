@@ -272,7 +272,7 @@ let projects = [
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
     ~repository:(`Github "hammerlab/ketrew")
-    ~interesting_checkouts:["dev"]
+    ~interesting_checkouts:["pbs_backend"]
     ~build_documentation:(fun branch -> [
           `Do ["bash"; "please.sh"; "clean"; "build"];
           `Do ["bash"; "please.sh"; "doc"];
