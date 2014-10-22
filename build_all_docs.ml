@@ -130,9 +130,9 @@ let build_website ~host ~work_dir projects =
                | [] -> ""
                | more -> 
                  sprintf ", and also the documentation for specific \
-                          version%s/branche%s %s"
+                          version%s/branch%s %s"
                    (if List.length more = 1 then "" else "s")
-                   (if List.length more = 1 then ": " else "s: ")
+                   (if List.length more = 1 then ": " else "es: ")
                    (List.map more ~f:(fun m ->
                         sprintf "[`%s`](%s/%s/index.html)" m 
                           p#basename m)
@@ -254,6 +254,7 @@ let projects = [
                        "Make_output", "Sosa.BASIC_STRING."]
           ~more_files:["test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)"]
       )
+    ~interesting_checkouts:["dev"]
     ~repository:(`Github "smondet/sosa");
   project "docout"
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
