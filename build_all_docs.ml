@@ -305,14 +305,9 @@ let projects = [
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
     ~repository:(`Github "hammerlab/ketrew")
-    ~interesting_checkouts:["dev"; ]
+    ~interesting_checkouts:["improve_docs"]
     ~build_documentation:(fun branch ->
-        `Do ["opam"; "remove"; "--yes"; "ketrew"]
-        :: (match branch with
-          | "dev" -> `Do ["opam"; "pin"; "add"; "--yes"; "cohttp"; "0.12.0"]
-          | "master" | _  ->
-            `Do ["opam"; "pin"; "add"; "--yes"; "cohttp"; "0.11.0"])
-        :: [
+        [
           `Do ["bash"; "please.sh"; "clean"; "build"];
           `Do ["bash"; "please.sh"; "doc"];
           `Get (match branch with
