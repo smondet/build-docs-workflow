@@ -281,6 +281,7 @@ let projects = [
                   [ATD](https://github.com/mjambon/atd/blob/master/atd_ast.mli) \
                   descriptions to OCaml code which defines \
                   [CConv](https://github.com/c-cube/cconv) sources and sinks"
+    ~interesting_checkouts:["atd2cconv.0.0.0"]
     ~build_documentation:(fun branch ->
       call_ocaml_doc ~packages:["atd"; "nonstd"; "smart_print"]
         ~title:"Atd2cconv API" ["src/lib/atd2cconv.mli"]
