@@ -322,6 +322,17 @@ let projects = [
       `Do ["make"; "doc"];
       `Get "_doc/";
     ]);
+  project "trakeva"
+    ~description:"Transactions, Keys, and Values: an API describing key-value \
+                  storage with ACID transactions *and* (for now 2) \
+                  different backends"
+    ~repository:(`Github "smondet/trakeva")
+    ~build_documentation:(fun _ -> [
+      `Do ["make"; "configure"];
+      `Do ["make"];
+      `Do ["make"; "doc"];
+      `Get "_doc/";
+    ]);
 ]
 
 let () =
