@@ -305,7 +305,7 @@ let projects = [
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
     ~repository:(`Github "hammerlab/ketrew")
-    ~interesting_checkouts:["improve_docs"]
+    ~interesting_checkouts:["doc/I82/howto_release"]
     ~build_documentation:(fun branch ->
         [
           `Do ["bash"; "please.sh"; "clean"; "build"];
