@@ -41,6 +41,13 @@ let css = [
   "https://cdn.rawgit.com/hammerlab/ketrew/2d1c430cca52caa71e363a765ff8775a6ae14ba9/src/doc/code_style.css";
 ]
 
+let rec oxford_comatize = function
+| [] -> ""
+| [one] -> one
+| [one; two] -> one ^ " and " ^ two
+| [one; two; three] -> one  ^ ", " ^ two ^ ", and " ^ three
+| one :: more -> one ^ ", " ^ oxford_comatize more
+
 let build_website ~host ~work_dir projects =
   let open Ketrew.EDSL in
   let make prog =
@@ -66,14 +73,16 @@ let build_website ~host ~work_dir projects =
       | `Main_level ->
         "../",  
         (List.map p#interesting_checkouts
-          ~f:(fun b -> sprintf "- Branch/Tag: [`%s`](./%s/index.html)\n" b b))
+           ~f:(fun (n,b) ->
+               sprintf "- Documentation for [%s](./%s/index.html)\n" n b))
       | `Interesting_checkout ic ->
         "../../", 
-        ("- [`master`](../index.html) branch\n"
+        ("- Documentation for the [`master`](../index.html) branch\n"
          :: List.filter_map p#interesting_checkouts
            ~f:(function
-             | b when b = ic -> None
-             | b -> Some (sprintf "- Branch/Tag: [`%s`](../%s/index.html)\n" b b)))
+             | (_, b) when b = ic -> None
+             | (n, b) ->
+               Some (sprintf "- Documentation for [%s](../%s/index.html)\n" n b)))
     in
     Program.shf "export ADD_TO_MENU='\
                  %s\
@@ -108,7 +117,7 @@ let build_website ~host ~work_dir projects =
                   && export_css
                   && export_add_to_menu p `Main_level
                   && do_stuff "master"
-                  && chain (List.map p#interesting_checkouts (fun co ->
+                  && chain (List.map p#interesting_checkouts (fun (_, co) ->
                       exec ["git"; "checkout"; co]
                       && export_add_to_menu p (`Interesting_checkout co)
                       &&  do_stuff co
@@ -129,14 +138,10 @@ let build_website ~host ~work_dir projects =
               (match p#interesting_checkouts with
                | [] -> ""
                | more -> 
-                 sprintf ", and also the documentation for specific \
-                          version%s/branch%s %s"
-                   (if List.length more = 1 then "" else "s")
-                   (if List.length more = 1 then ": " else "es: ")
-                   (List.map more ~f:(fun m ->
-                        sprintf "[`%s`](%s/%s/index.html)" m 
-                          p#basename m)
-                    |> String.concat ~sep:", "))
+                 sprintf ", and also the documentation for %s"
+                   (List.map more ~f:(fun (name, m) ->
+                        sprintf "[%s](%s/%s/index.html)" name p#basename m)
+                    |> oxford_comatize))
           in
           match p#build_documentation with
           | Some _ ->
@@ -254,7 +259,7 @@ let projects = [
                        "Make_output", "Sosa.BASIC_STRING."]
           ~more_files:["test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)"]
       )
-    ~interesting_checkouts:["dev"]
+    ~interesting_checkouts:["the `dev` branch", "dev"]
     ~repository:(`Github "smondet/sosa");
   project "docout"
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
@@ -281,7 +286,7 @@ let projects = [
                   [ATD](https://github.com/mjambon/atd/blob/master/atd_ast.mli) \
                   descriptions to OCaml code which defines \
                   [CConv](https://github.com/c-cube/cconv) sources and sinks"
-    ~interesting_checkouts:["atd2cconv.0.0.0"]
+    ~interesting_checkouts:["version 0.0.0", "atd2cconv.0.0.0"]
     ~build_documentation:(fun branch ->
       call_ocaml_doc ~packages:["atd"; "nonstd"; "smart_print"]
         ~title:"Atd2cconv API" ["src/lib/atd2cconv.mli"]
@@ -306,7 +311,7 @@ let projects = [
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
     ~repository:(`Github "hammerlab/ketrew")
-    ~interesting_checkouts:["doc/I82/howto_release"]
+    ~interesting_checkouts:["version 0.0.0", "doc.0.0.0"]
     ~build_documentation:(fun branch ->
         [
           `Do ["bash"; "please.sh"; "clean"; "build"];
