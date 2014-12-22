@@ -41,12 +41,12 @@ let css = [
   "https://cdn.rawgit.com/hammerlab/ketrew/2d1c430cca52caa71e363a765ff8775a6ae14ba9/src/doc/code_style.css";
 ]
 
-let rec oxford_comatize = function
+let rec oxford_comatize ~and_word = function
 | [] -> ""
 | [one] -> one
-| [one; two] -> one ^ " and " ^ two
-| [one; two; three] -> one  ^ ", " ^ two ^ ", and " ^ three
-| one :: more -> one ^ ", " ^ oxford_comatize more
+| [one; two] -> one ^ sprintf " %s " and_word ^ two
+| [one; two; three] -> one  ^ ", " ^ two ^ sprintf ", %s " and_word ^ three
+| one :: more -> one ^ ", " ^ oxford_comatize ~and_word more
 
 let build_website ~host ~work_dir projects =
   let open Ketrew.EDSL in
@@ -141,7 +141,7 @@ let build_website ~host ~work_dir projects =
                  sprintf ", and also the documentation for %s"
                    (List.map more ~f:(fun (name, m) ->
                         sprintf "[%s](%s/%s/index.html)" name p#basename m)
-                    |> oxford_comatize))
+                    |> oxford_comatize ~and_word:"and for"))
           in
           match p#build_documentation with
           | Some _ ->
