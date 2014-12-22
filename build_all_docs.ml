@@ -257,9 +257,12 @@ let projects = [
         please_dot_ml_doc_building "sosa"
           ~catch_more:[module_type_name_rex,"Sosa.";
                        "Make_output", "Sosa.BASIC_STRING."]
-          ~more_files:["test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)"]
+          ~more_files:[
+            "test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)";
+            "INSTALL.md", "Build instructions";
+          ]
       )
-    ~interesting_checkouts:["the `dev` branch", "dev"]
+    ~interesting_checkouts:["version 0.0.1", "doc.0.0.1";]
     ~repository:(`Github "smondet/sosa");
   project "docout"
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
