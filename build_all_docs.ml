@@ -317,6 +317,8 @@ let projects = [
     ~interesting_checkouts:["version 0.0.0", "doc.0.0.0"]
     ~build_documentation:(fun branch ->
         [
+          `Do ["opam"; "remove"; "-y"; "ketrew"];
+          `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.13.0"];
           `Do ["bash"; "please.sh"; "clean"; "build"];
           `Do ["bash"; "please.sh"; "doc"];
           `Get (match branch with
