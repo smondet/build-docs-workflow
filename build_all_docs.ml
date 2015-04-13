@@ -199,28 +199,32 @@ let test_module_name =
     )
 *)
 
-let please_dot_ml_doc_building ?(catch_more=[]) ?(more_files=[]) name =
+let call_oredoc ?(api="build/doc") ?(catch_more=[]) ?(more_files=[]) ~modname name =
+  `Do ["sh"; "-c"; sprintf 
+         "API=%s INPUT=%s.ml%s INDEX=README.md \
+          CATCH_MODULE_PATHS='%s^%s:,' \
+          TITLE_SUBSTITUTIONS='%s%s.ml:Literate Implementation' \
+          TITLE_PREFIX='%s: ' oredoc"
+         Filename.(quote api)
+         name
+         (List.map more_files ~f:(fun (a, b) -> sprintf ",%s" a)
+          |> String.concat ~sep:"")
+         (List.map catch_more ~f:(fun (a, b) -> sprintf "%s:%s," a b)
+          |> String.concat ~sep:"")
+         modname
+         (List.map more_files ~f:(fun (a, b) ->
+              sprintf "%s:%s," (Filename.basename a) b)
+          |> String.concat ~sep:"")
+         name
+         modname]
+
+let please_dot_ml_doc_building ?catch_more ?more_files name =
   let modname = Oldschool_string.capitalize name in
   [
     `Do ["ocaml"; "please.ml"; "clean"];
     `Do ["ocaml"; "please.ml"; "build"];
     `Do ["ocaml"; "please.ml"; "build_doc"];
-    `Do ["sh"; "-c"; sprintf 
-           "API=_build/doc/ INPUT=%s.ml%s INDEX=README.md \
-            CATCH_MODULE_PATHS='%s^%s:,' \
-            TITLE_SUBSTITUTIONS='%s%s.ml:Literate Implementation' \
-            TITLE_PREFIX='%s: ' oredoc"
-           name
-           (List.map more_files ~f:(fun (a, b) -> sprintf ",%s" a)
-            |> String.concat ~sep:"")
-           (List.map catch_more ~f:(fun (a, b) -> sprintf "%s:%s," a b)
-            |> String.concat ~sep:"")
-           modname
-           (List.map more_files ~f:(fun (a, b) ->
-                sprintf "%s:%s," (Filename.basename a) b)
-            |> String.concat ~sep:"")
-           name
-           modname];
+    call_oredoc ?catch_more ?more_files ~api:"_build/doc" ~modname name;
     `Get "_doc/";
   ]
 
@@ -253,15 +257,22 @@ let projects = [
     ~description:"The “Sane OCaml String API” library is a set of APIs (module types) \
                   that define what a string of characters should be, \
                   and a set of modules and functors that implement them"
-    ~build_documentation:(fun _ ->
-        please_dot_ml_doc_building "sosa"
-          ~catch_more:[module_type_name_rex,"Sosa.";
-                       "Make_output", "Sosa.BASIC_STRING."]
-          ~more_files:[
-            "test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)";
-            "INSTALL.md", "Build instructions";
-          ]
-      )
+    ~build_documentation:(
+      let catch_more =
+        [module_type_name_rex,"Sosa.";
+         "Make_output", "Sosa.BASIC_STRING."] in
+      let more_files = [
+        "test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)";
+        "INSTALL.md", "Build instructions";
+      ] in
+      function
+      | "doc.0.0.1" ->
+        please_dot_ml_doc_building "sosa" ~catch_more ~more_files
+      | branch ->
+        [ `Do ["make"; "build"; "doc"];
+          call_oredoc ~catch_more ~more_files ~api:"./doc" ~modname:"Sosa" "sosa";
+          `Get "_doc"]
+    )
     ~interesting_checkouts:["version 0.0.1", "doc.0.0.1";]
     ~repository:(`Github "smondet/sosa");
   project "docout"
@@ -291,59 +302,75 @@ let projects = [
                   [CConv](https://github.com/c-cube/cconv) sources and sinks"
     ~interesting_checkouts:["version 0.0.0", "atd2cconv.0.0.0"]
     ~build_documentation:(fun branch ->
-      call_ocaml_doc ~packages:["atd"; "nonstd"; "smart_print"]
-        ~title:"Atd2cconv API" ["src/lib/atd2cconv.mli"]
-      @ [
-        `Do ["sh"; "-c";  
-             "API=_apidoc/ INPUT=src/app,src/lib INDEX=README.md \
-              CATCH_MODULE_PATHS='Atd2cconv:' \
-              TITLE_SUBSTITUTIONS='main.ml:Application Implementation, \
-              atd2cconv.ml:Library Implementation' \
-              TITLE_PREFIX='Atd2cconv: ' oredoc"];
-        `Get ("_doc");
-      ]
-    )
+        call_ocaml_doc ~packages:["atd"; "nonstd"; "smart_print"]
+          ~title:"Atd2cconv API" ["src/lib/atd2cconv.mli"]
+        @ [
+          `Do ["sh"; "-c";  
+               "API=_apidoc/ INPUT=src/app,src/lib INDEX=README.md \
+                CATCH_MODULE_PATHS='Atd2cconv:' \
+                TITLE_SUBSTITUTIONS='main.ml:Application Implementation, \
+                atd2cconv.ml:Library Implementation' \
+                TITLE_PREFIX='Atd2cconv: ' oredoc"];
+          `Get ("_doc");
+        ]
+      )
     ~repository:(`Github "smondet/atd2cconv");
   project  "pvem_lwt_unix"
-      ~description:"`Pvem_lwt_unix` provides a high-level API on top of \
-                    `Lwt_unix`, with comprehensive error types"
-      ~build_documentation:(fun _ ->
+    ~description:"`Pvem_lwt_unix` provides a high-level API on top of \
+                  `Lwt_unix`, with comprehensive error types"
+    ~build_documentation:(fun _ ->
         let catch_more = [module_type_name_rex, "Pvem_lwt_unix."; ] in
         please_dot_ml_doc_building ~catch_more "pvem_lwt_unix")
     ~repository:(`Bitbucket "smondet/pvem_lwt_unix");
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
     ~repository:(`Github "hammerlab/ketrew")
-    ~interesting_checkouts:["version 0.0.0", "doc.0.0.0"]
-    ~build_documentation:(fun branch ->
+    ~interesting_checkouts:["version 0.0.0", "doc.0.0.0";
+                            "“Full-PPX” branch", "json_config"]
+    ~build_documentation:(function
+      | "master" ->
+        [
+          `Do ["opam"; "install"; "toml.1.0.0"];
+          `Do ["make"; "distclean"; "gen"; "configure"; "build"; "doc"];
+          `Get "_doc"]
+      | "doc.0.0.0" ->
+        []
+        (* does not work with OCaml 4.02.x *) (*
         [
           `Do ["opam"; "remove"; "-y"; "ketrew"];
           `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.13.0"];
           `Do ["bash"; "please.sh"; "clean"; "build"];
           `Do ["bash"; "please.sh"; "doc"];
+          `Get "_doc/doc.0.0.0";
+        ]*)
+      | branch ->
+        [
+          `Do ["opam"; "pin"; "-y"; "remove"; "cohttp";];
+          `Do ["opam"; "upgrade"; "cohttp";];
+          `Do ["make"; "distclean"; "configure"; "build"; "doc"];
           `Get (match branch with
             | "master" -> "_doc"
-            | branch -> sprintf "_doc/%s" branch);
-        ]);
+            | branch -> sprintf "_doc/%s" branch);]
+      );
   project "oredoc"
     ~description:"Build documentation websites for *some* OCaml projects"
     ~repository:(`Github "smondet/oredoc")
     ~build_documentation:(fun _ -> [
-      `Do ["make"];
-      `Do ["make"; "doc"];
-      `Get "_doc/";
-    ]);
+          `Do ["make"];
+          `Do ["make"; "doc"];
+          `Get "_doc/";
+        ]);
   project "trakeva"
     ~description:"Transactions, Keys, and Values: an API describing key-value \
                   storage with ACID transactions *and* (for now 2) \
                   different backends"
     ~repository:(`Github "smondet/trakeva")
     ~build_documentation:(fun _ -> [
-      `Do ["make"; "configure"];
-      `Do ["make"];
-      `Do ["make"; "doc"];
-      `Get "_doc/";
-    ]);
+          `Do ["make"; "configure"];
+          `Do ["make"];
+          `Do ["make"; "doc"];
+          `Get "_doc/";
+        ]);
 ]
 
 let () =
@@ -353,9 +380,9 @@ let () =
       let open Ketrew_configuration in
       client url ~token:auth_token
       |> create ~debug_level:2 in
-    Ketrew.EDSL.(
-      run (build_website
-             ~work_dir ~host:(Host.parse "/tmp/KT") projects)
+    Ketrew_client.(
+      submit (build_website
+             ~work_dir ~host:(Ketrew.EDSL.Host.parse "/tmp/KT") projects)
         ~override_configuration
     )
   | other -> printf "usage: %s go <URL> <TOKEN> <TMPDIR>\n%!" Sys.argv.(0)
