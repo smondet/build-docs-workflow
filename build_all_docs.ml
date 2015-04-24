@@ -325,17 +325,17 @@ let projects = [
   project "ketrew"
     ~description:"Workflow Engine for complex computational experiments"
     ~repository:(`Github "hammerlab/ketrew")
-    ~interesting_checkouts:["version 0.0.0", "doc.0.0.0";
-                            "“Full-PPX” branch", "json_config"]
+    ~interesting_checkouts:[
+      "version 0.0.0", "doc.0.0.0";
+    ]
     ~build_documentation:(function
       | "master" ->
         [
-          `Do ["opam"; "install"; "toml.1.0.0"];
           `Do ["make"; "distclean"; "gen"; "configure"; "build"; "doc"];
           `Get "_doc"]
       | "doc.0.0.0" ->
         []
-        (* does not work with OCaml 4.02.x *) (*
+      (* does not work with OCaml 4.02.x *) (*
         [
           `Do ["opam"; "remove"; "-y"; "ketrew"];
           `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.13.0"];
@@ -345,8 +345,6 @@ let projects = [
         ]*)
       | branch ->
         [
-          `Do ["opam"; "pin"; "-y"; "remove"; "cohttp";];
-          `Do ["opam"; "upgrade"; "cohttp";];
           `Do ["make"; "distclean"; "configure"; "build"; "doc"];
           `Get (match branch with
             | "master" -> "_doc"
