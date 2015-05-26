@@ -360,9 +360,11 @@ let projects = [
         ]);
   project "trakeva"
     ~description:"Transactions, Keys, and Values: an API describing key-value \
-                  storage with ACID transactions *and* (for now 2) \
-                  different backends"
+                  storage with ACID transactions *and* different backends"
     ~repository:(`Github "smondet/trakeva")
+    ~interesting_checkouts:[
+      "version 0.0.0", "trakeva.0.0.0";
+    ]
     ~build_documentation:(fun _ -> [
           `Do ["make"; "configure"];
           `Do ["make"];
