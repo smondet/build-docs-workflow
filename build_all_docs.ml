@@ -98,7 +98,7 @@ let build_website ~host ~work_dir projects =
     List.filter_map projects ~f:(fun p ->
         Option.map p#build_documentation (fun stuff_todo ->
             target (sprintf "docof-%s" p#name)
-              ~dependencies:[tmp; results]
+              ~depends_on:[tmp; results]
               ~make:(make Program.(
                   let do_stuff co =
                     List.map (stuff_todo co) (function
@@ -165,7 +165,7 @@ let build_website ~host ~work_dir projects =
     in
     let index_md = (results#product#path // "index.md") in
     target "index-page"
-      ~dependencies:[results]
+      ~depends_on:[results]
       ~make:(make Program.(
           shf "echo %s > %s" Filename.(quote content)  index_md
           && export_css
@@ -175,7 +175,7 @@ let build_website ~host ~work_dir projects =
   in
   let workflow_ancestor =
     target "build-all-docs"
-      ~dependencies:(index_page :: documentations)
+      ~depends_on:(index_page :: documentations)
       ~make:(make_shell "echo 'SUCCESS'")
   in
   workflow_ancestor
