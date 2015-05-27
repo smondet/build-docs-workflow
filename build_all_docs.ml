@@ -327,6 +327,7 @@ let projects = [
     ~repository:(`Github "hammerlab/ketrew")
     ~interesting_checkouts:[
       "version 0.0.0", "doc.0.0.0";
+      "version 1.0.0", "doc.1.0.0";
     ]
     ~build_documentation:(function
       | "master" ->
