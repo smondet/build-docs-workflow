@@ -11,6 +11,10 @@ let (//) = Filename.concat
 (*
 :Use ketrew
 :set makeprg=ocaml\ build_all_docs.ml
+   
+
+rsync -a $PWD/tmpdir/results/ ../smondet.github.com/software/
+
 *)
 
 let project
@@ -336,14 +340,16 @@ let projects = [
           `Get "_doc"]
       | "doc.0.0.0" ->
         []
-      (* does not work with OCaml 4.02.x *) (*
+      (* does not work with OCaml 4.02.x *)
+          (* `Do ["bash"; "please.sh"; "clean"; "build"]; *)
+          (* `Do ["bash"; "please.sh"; "doc"]; *)
+      | "doc.1.0.0" ->
         [
           `Do ["opam"; "remove"; "-y"; "ketrew"];
-          `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.13.0"];
-          `Do ["bash"; "please.sh"; "clean"; "build"];
-          `Do ["bash"; "please.sh"; "doc"];
-          `Get "_doc/doc.0.0.0";
-        ]*)
+          `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.17.2"];
+          `Do ["make"; "distclean"; "configure"; "build"; "doc"];
+          `Get "_doc/doc.1.0.0";
+        ]
       | branch ->
         [
           `Do ["make"; "distclean"; "configure"; "build"; "doc"];
