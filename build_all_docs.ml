@@ -332,6 +332,7 @@ let projects = [
     ~interesting_checkouts:[
       "version 0.0.0", "doc.0.0.0";
       "version 1.0.0", "doc.1.0.0";
+      "version 1.1.0", "doc.1.1.0";
     ]
     ~build_documentation:(function
       | "master" ->
@@ -352,6 +353,7 @@ let projects = [
         ]
       | branch ->
         [
+          `Do ["opam"; "pin"; "remove"; "cohttp"; ];
           `Do ["make"; "distclean"; "configure"; "build"; "doc"];
           `Get (match branch with
             | "master" -> "_doc"
