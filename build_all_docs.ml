@@ -277,8 +277,9 @@ let projects = [
           call_oredoc ~catch_more ~more_files ~api:"./doc" ~modname:"Sosa" "sosa";
           `Get "_doc"]
     )
-    ~interesting_checkouts:["version 0.0.1", "doc.0.0.1";]
-    ~repository:(`Github "smondet/sosa");
+    ~interesting_checkouts:["version 0.0.1", "doc.0.0.1";
+                            "version 0.1.0", "doc.0.1.0"]
+    ~repository:(`Github "hammerlab/sosa");
   project "docout"
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
                   DSL on top of the \
