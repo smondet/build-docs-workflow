@@ -300,6 +300,7 @@ let projects = [
         let more_files = ["doc/implementation.md", "Implementation Notes"] in
         please_dot_ml_doc_building ~catch_more ~more_files "pvem")
     ~repository:(`Bitbucket "smondet/pvem");
+  (*
   project "atd2cconv" 
     ~description:"The `atd2cconv` application compiles \
                   [ATD](https://github.com/mjambon/atd/blob/master/atd_ast.mli) \
@@ -320,6 +321,7 @@ let projects = [
         ]
       )
     ~repository:(`Github "smondet/atd2cconv");
+     *)
   project  "pvem_lwt_unix"
     ~description:"`Pvem_lwt_unix` provides a high-level API on top of \
                   `Lwt_unix`, with comprehensive error types"
@@ -338,27 +340,37 @@ let projects = [
     ~build_documentation:(function
       | "master" ->
         [
-          `Do ["make"; "distclean"; "gen"; "configure"; "build"; "doc"];
+          `Do ["omake"; "distclean"];
+          `Do ["omake"; "build-all"; "doc"];
           `Get "_doc"]
       | "doc.0.0.0" ->
         []
       (* does not work with OCaml 4.02.x *)
-          (* `Do ["bash"; "please.sh"; "clean"; "build"]; *)
-          (* `Do ["bash"; "please.sh"; "doc"]; *)
+      (* `Do ["bash"; "please.sh"; "clean"; "build"]; *)
+      (* `Do ["bash"; "please.sh"; "doc"]; *)
       | "doc.1.0.0" ->
-        [
+        []
+        (* [
           `Do ["opam"; "remove"; "-y"; "ketrew"];
           `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.17.2"];
           `Do ["make"; "distclean"; "configure"; "build"; "doc"];
           `Get "_doc/doc.1.0.0";
+        ] *)
+      | "doc.1.1.0" ->
+        [
+          (* `Do ["opam"; "pin"; "remove"; "cohttp"; ]; *)
+          `Do ["make"; "distclean"; "configure"; "build"; "doc"];
+          `Get "_doc/doc.1.1.0";
         ]
       | branch ->
         [
-          `Do ["opam"; "pin"; "remove"; "cohttp"; ];
-          `Do ["make"; "distclean"; "configure"; "build"; "doc"];
+          (* `Do ["opam"; "pin"; "remove"; "cohttp"; ]; *)
+          `Do ["omake"; "distclean"];
+          `Do ["omake"; "build-all"; "doc"];
           `Get (match branch with
             | "master" -> "_doc"
-            | branch -> sprintf "_doc/%s" branch);]
+            | branch -> sprintf "_doc/%s" branch);
+        ]
       );
   project "oredoc"
     ~description:"Build documentation websites for *some* OCaml projects"
@@ -387,13 +399,14 @@ let () =
   match Array.to_list Sys.argv with
   | exec :: "go" :: url :: auth_token :: work_dir ::  [] ->
     let override_configuration =
-      let open Ketrew_configuration in
+      let open Ketrew.Configuration in
       client url ~token:auth_token
       |> create ~debug_level:2 in
-    Ketrew_client.(
-      submit (build_website
-             ~work_dir ~host:(Ketrew.EDSL.Host.parse "/tmp/KT") projects)
+    Ketrew.Client.(
+      submit
+        (build_website
+           ~work_dir ~host:(Ketrew.EDSL.Host.parse "/tmp/KT") projects)
         ~override_configuration
-    )
+        ~add_tags:["build-all-docs"])
   | other -> printf "usage: %s go <URL> <TOKEN> <TMPDIR>\n%!" Sys.argv.(0)
 
