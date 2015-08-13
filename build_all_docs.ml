@@ -336,6 +336,7 @@ let projects = [
       "version 0.0.0", "doc.0.0.0";
       "version 1.0.0", "doc.1.0.0";
       "version 1.1.0", "doc.1.1.0";
+      "version 1.1.1", "doc.1.1.1";
     ]
     ~build_documentation:(function
       | "master" ->
@@ -343,24 +344,18 @@ let projects = [
           `Do ["omake"; "distclean"];
           `Do ["omake"; "build-all"; "doc"];
           `Get "_doc"]
-      | "doc.0.0.0" ->
+      | "doc.0.0.0"
+      | "doc.1.0.0"
+      | "doc.1.1.0" ->
         []
       (* does not work with OCaml 4.02.x *)
       (* `Do ["bash"; "please.sh"; "clean"; "build"]; *)
       (* `Do ["bash"; "please.sh"; "doc"]; *)
-      | "doc.1.0.0" ->
-        []
-        (* [
-          `Do ["opam"; "remove"; "-y"; "ketrew"];
-          `Do ["opam"; "pin"; "-y"; "add"; "cohttp"; "0.17.2"];
-          `Do ["make"; "distclean"; "configure"; "build"; "doc"];
-          `Get "_doc/doc.1.0.0";
-        ] *)
-      | "doc.1.1.0" ->
+      | "doc.1.1.1" as branch  ->
         [
           (* `Do ["opam"; "pin"; "remove"; "cohttp"; ]; *)
           `Do ["make"; "distclean"; "configure"; "build"; "doc"];
-          `Get "_doc/doc.1.1.0";
+          `Get (sprintf "_doc/%s" branch);
         ]
       | branch ->
         [
