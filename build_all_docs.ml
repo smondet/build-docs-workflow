@@ -337,6 +337,7 @@ let projects = [
       "version 1.0.0", "doc.1.0.0";
       "version 1.1.0", "doc.1.1.0";
       "version 1.1.1", "doc.1.1.1";
+      "version 2.0.0", "doc.2.0.0";
     ]
     ~build_documentation:(function
       | "master" ->
