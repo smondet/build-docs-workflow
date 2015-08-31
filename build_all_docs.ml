@@ -404,5 +404,15 @@ let () =
            ~work_dir ~host:(Ketrew.EDSL.Host.parse "/tmp/KT") projects)
         ~override_configuration
         ~add_tags:["build-all-docs"])
-  | other -> printf "usage: %s go <URL> <TOKEN> <TMPDIR>\n%!" Sys.argv.(0)
+  | exec :: "default-client" :: host_str :: work_dir ::  [] ->
+    Ketrew.Client.(
+      submit
+        (build_website
+           ~work_dir ~host:(Ketrew.EDSL.Host.parse host_str) projects)
+        ~add_tags:["build-all-docs"])
+  | other ->
+    printf "usage:\n\
+            %s go <URL> <TOKEN> <TMPDIR>\n\
+            %s default-client <HOST> <TMPDIR>\n\
+            %!" Sys.argv.(0) Sys.argv.(0)
 
