@@ -13,7 +13,10 @@ let (//) = Filename.concat
 :set makeprg=ocaml\ build_all_docs.ml
    
 
-rsync -a $PWD/tmpdir/results/ ../smondet.github.com/software/
+With Ketrew's test environment:
+
+    ocaml build_all_docs.ml go https://127.0.0.1:8443/ nekot $PWD/tmpdir
+    rsync -a $PWD/tmpdir/results/ ../smondet.github.com/software/
 
 *)
 
@@ -388,6 +391,7 @@ let projects = [
           `Do ["make"];
           `Do ["make"; "doc"];
           `Get "_doc/";
+          `Do ["make"; "distclean"];
         ]);
 ]
 
