@@ -261,15 +261,18 @@ let projects = [
         please_dot_ml_doc_building "nonstd" ~catch_more)
     ~repository:(`Bitbucket "smondet/nonstd");
   project "sosa"
-    ~description:"The “Sane OCaml String API” library is a set of APIs (module types) \
-                  that define what a string of characters should be, \
-                  and a set of modules and functors that implement them"
+    ~description:"The “Sane OCaml String API” library is a set of APIs \
+                  (module types) that define what a string of \
+                  characters should be, and a set of modules and \
+                  functors that implement them"
     ~build_documentation:(
-      let catch_more =
-        [module_type_name_rex,"Sosa.";
-         "Make_output", "Sosa.BASIC_STRING."] in
+      let catch_more = [
+        module_type_name_rex,"Api.";
+        "Make_output", "Api.BASIC_STRING.";
+        "Api", "";
+      ] in
       let more_files = [
-        "test/sosa_test.ml", "Tests & Benchmarks (`sosa_test.ml`)";
+        "src/test/main.ml", "Tests & Benchmarks (`src/test/main.ml`)";
         "INSTALL.md", "Build instructions";
       ] in
       function
