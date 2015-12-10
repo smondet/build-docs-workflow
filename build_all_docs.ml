@@ -408,7 +408,8 @@ let () =
     Ketrew.Client.(
       submit
         (build_website
-           ~work_dir ~host:(Ketrew.EDSL.Host.parse "/tmp/KT") projects)
+           ~work_dir ~host:(Ketrew.EDSL.Host.parse
+                              (sprintf "/tmp/Play-%s" (Ketrew_pure.Internal_pervasives.Unique_id.create ()))) projects)
         ~override_configuration
         ~add_tags:["build-all-docs"])
   | exec :: "default-client" :: host_str :: work_dir ::  [] ->
