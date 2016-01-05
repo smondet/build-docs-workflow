@@ -276,15 +276,19 @@ let projects = [
         "INSTALL.md", "Build instructions";
       ] in
       function
-      | "doc.0.0.1" ->
-        please_dot_ml_doc_building "sosa" ~catch_more ~more_files
+      (*    | "doc.0.0.1" ->
+            please_dot_ml_doc_building "sosa" ~catch_more ~more_files
+      *)
+      | "doc.0.1.0" | "doc.0.0.1" -> []
       | branch ->
-        [ `Do ["make"; "build"; "doc"];
+        [ `Do ["rm"; "-fr"; "./doc"; "./_build"];
+          `Do ["make"; "build"; "doc"];
           call_oredoc ~catch_more ~more_files ~api:"./doc" ~modname:"Sosa" "sosa";
           `Get "_doc"]
     )
     ~interesting_checkouts:["version 0.0.1", "doc.0.0.1";
-                            "version 0.1.0", "doc.0.1.0"]
+                            "version 0.1.0", "doc.0.1.0";
+                            "version 0.2.0", "doc.0.2.0"]
     ~repository:(`Github "hammerlab/sosa");
   project "docout"
     ~description:"The functor `Docout.Make_logger` creates a nice embedded \
@@ -353,17 +357,10 @@ let projects = [
           `Get "_doc"]
       | "doc.0.0.0"
       | "doc.1.0.0"
-      | "doc.1.1.0" ->
-        []
-      (* does not work with OCaml 4.02.x *)
-      (* `Do ["bash"; "please.sh"; "clean"; "build"]; *)
-      (* `Do ["bash"; "please.sh"; "doc"]; *)
-      | "doc.1.1.1" as branch  ->
-        [
-          (* `Do ["opam"; "pin"; "remove"; "cohttp"; ]; *)
-          `Do ["make"; "distclean"; "configure"; "build"; "doc"];
-          `Get (sprintf "_doc/%s" branch);
-        ]
+      | "doc.1.1.0"
+      | "doc.1.1.1"
+      | "doc.2.0.0"
+        -> []
       | branch ->
         [
           (* `Do ["opam"; "pin"; "remove"; "cohttp"; ]; *)
