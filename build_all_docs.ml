@@ -385,6 +385,7 @@ let projects = [
     ~repository:(`Github "smondet/trakeva")
     ~interesting_checkouts:[
       "version 0.0.0", "trakeva.0.0.0";
+      "version 0.1.0", "trakeva.0.1.0";
     ]
     ~build_documentation:(fun _ -> [
           `Do ["make"; "configure"];
